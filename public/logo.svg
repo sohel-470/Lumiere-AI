@@ -4,18 +4,18 @@
     darker colors at the corners of the play button 
   -->
   <g style="mix-blend-mode: multiply;">
-    <!-- Top Edge (Amber/Yellow) -->
+    <!-- Top Edge (Amber/Yellow) F5A623 -->
     <path d="M 40,32 L 72,50" stroke="#F5A623" stroke-width="18" stroke-linecap="round" />
     
-    <!-- Bottom Edge (Teal/Green) -->
+    <!-- Bottom Edge (Teal/Green) 2DD4BF-->
     <path d="M 40,68 L 72,50" stroke="#2DD4BF" stroke-width="18" stroke-linecap="round" />
     
-    <!-- Left Edge (Indigo/Blue) -->
+    <!-- Left Edge (Indigo/Blue) 6366F1-->
     <path d="M 40,32 L 40,68" stroke="#6366F1" stroke-width="18" stroke-linecap="round" />
   </g>
 
   <!-- Typography matching the image -->
-  <text x="105" y="62" font-family="system-ui, -apple-system, sans-serif" font-size="34" font-weight="600" fill="#374151" letter-spacing="-0.5px">
-    Lumiere <tspan font-weight="500" fill="#8F00FF">AI</tspan>
+  <text x="105" y="62" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="600" fill="#d5d7db" letter-spacing="-0.5px">
+    Lumiere <tspan y="64" font-weight="700" font-size="34" fill="#ec0f6b">AI</tspan>
   </text>
 </svg>

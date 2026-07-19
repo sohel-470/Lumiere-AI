@@ -9,6 +9,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { FileText } from 'lucide-react'
 
 const SelectTopic = ({ onUserSelect }) => {
     const options = ['Custom Prompt', 'Random AI Story', 'Scary Story', 'Historical Facts', 'Bed Time Story', 'Motivational', 'Fun Facts']
@@ -17,14 +18,14 @@ const SelectTopic = ({ onUserSelect }) => {
 
     return (
         <div>
-            <h2 className='font-bold text-2xl text-primary'>Content</h2>
+            <h2 className='font-bold text-2xl text-primary flex items-center gap-2'> <FileText />Content</h2>
             <p className='text-gray-400'>What is the topic of your video?</p>
 
             <Select onValueChange={(value) => {
                 setSelectedOption(value)
                 value != 'Custom Prompt' && onUserSelect('topic', value)
             }}>
-                <SelectTrigger className="w-full mt-2 p-6 text-lg">
+                <SelectTrigger className="w-full mt-7 p-6 text-lg">
                     <SelectValue placeholder="Select Topic" />
                 </SelectTrigger>
                 <SelectContent>
