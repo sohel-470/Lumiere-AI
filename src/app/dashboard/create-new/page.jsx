@@ -7,6 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Sparkles } from 'lucide-react'
 import axios from 'axios'
 import CustomLoading from './_components/CustomLoading'
+import { v4 as uuidv4 } from 'uuid';
+
+
+const scriptString = "Think history is boring? Think again! Here are three historical facts that sound fake but are 100% true. First up: Ancient Romans used human urine as mouthwash! They believed the ammonia kept their teeth pearly white. In 1932, the Australian military declared war on Emus... and the birds actually won! Mind blown: Cleopatra lived closer to the invention of the iPhone than to the building of the Great Pyramid of Giza. And finally, the ancient Mayans didn't just eat turkeys; they worshipped them as symbols of power and prestige! History is wild! Hit that follow button for more mind-blowing facts every day! "
 
 const CreateNew = () => {
   const [formData, setFormData] = useState({})
@@ -14,7 +18,7 @@ const CreateNew = () => {
   const [videoScript, setVideoScript] = useState()
 
   const onHandleInputChange = (fieldName, fieldValue) => {
-    console.log(fieldName,fieldValue)
+    console.log(fieldName, fieldValue)
     setFormData(prev => ({
       ...prev,
       [fieldName]: fieldValue
@@ -22,25 +26,55 @@ const CreateNew = () => {
   };
 
   //Get video script:
-  const GetVideoScript = async()=> {
+  const GetVideoScript = async () => {
     setLoading(true);
-    const result = await axios.post('/api/get-video-script',{
+    const result = await axios.post('/api/get-video-script', {
       topic: formData.topic,
       imageStyle: formData.imageStyle,
       duration: formData.duration
-    }).then((resp)=>{
+    }).then((resp) => {
       console.log(resp.data)
-      setVideoScript(resp.data.result);
+
+      const scriptData = resp.data.result; // Store the result in a variable
+
+      setVideoScript(scriptData); // Update state (for later use)
+      GenerateAudioFile(scriptData); // Pass the variable directly!
+
       return resp.data
-    }).catch((e)=>{
+    }).catch((e) => {
       console.log("Error generating script:", e)
     });
     setLoading(false);
   };
 
-  const onClickCreateHandler = ()=>{
-    GetVideoScript()
+  const onClickCreateHandler = () => {
+    // GetVideoScript()
+    GenerateAudioFile(scriptString)
   };
+
+
+  // Accept the scriptData as a parameter
+  const GenerateAudioFile = async (scriptString) => {
+    let script = '';
+    const id = uuidv4();
+
+    // Add an optional chaining (?.) just in case the API returns something unexpected
+    // scriptData?.forEach(item => {
+    //   const textChunk = item.contentText || item.ContentText || '';
+    //   script = script + textChunk + ' ';
+    // })
+    // console.log(script)
+
+    await axios.post('/api/generate-audio', {
+      text: scriptString,
+      id: id
+    }).then(resp => {
+      console.log(resp.data)
+    })
+  }
+
+
+
 
   return (
     // Added pb-36 (padding-bottom) so the user can scroll past the floating button
@@ -66,7 +100,7 @@ const CreateNew = () => {
         <Button className='pointer-events-auto flex flex-col items-center justify-center gap-1 bg-[#ec0f6b] hover:bg-[#d00d5e] text-white py-8 px-16 md:px-32 rounded-2xl shadow-[0px_10px_40px_rgba(236,15,107,0.9)] hover:shadow-[0_15px_50px_rgba(236,15,107,0.6)] transition-all duration-300 hover:-translate-y-2' onClick={onClickCreateHandler}>
 
           <div className='flex items-center gap-2 text-xl font-bold'>
-            <Sparkles size={22}  />
+            <Sparkles size={22} />
             Generate Video
           </div>
 
@@ -77,7 +111,7 @@ const CreateNew = () => {
 
         </Button>
       </div>
-      <CustomLoading loading={loading}/>
+      <CustomLoading loading={loading} />
     </div>
   )
 }
