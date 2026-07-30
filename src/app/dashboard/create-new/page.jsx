@@ -11,12 +11,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 const scriptString = "Think history is boring? Think again! Here are three historical facts that sound fake but are 100% true. First up: Ancient Romans used human urine as mouthwash! They believed the ammonia kept their teeth pearly white. In 1932, the Australian military declared war on Emus... and the birds actually won! Mind blown: Cleopatra lived closer to the invention of the iPhone than to the building of the Great Pyramid of Giza. And finally, the ancient Mayans didn't just eat turkeys; they worshipped them as symbols of power and prestige! History is wild! Hit that follow button for more mind-blowing facts every day! "
+const FILEURL = 'https://firebasestorage.googleapis.com/v0/b/lumiere-ai-fe65e.firebasestorage.app/o/lumiere-ai-files%2Ffbb27256-c943-42b2-9a93-aa5a53a09513.mp3?alt=media&token=c1339400-8626-4f22-99de-8173dfcbf548'
 
 const CreateNew = () => {
   const [formData, setFormData] = useState({})
   const [loading, setLoading] = useState(false)
   const [videoScript, setVideoScript] = useState()
   const [audioFileUrl, setAudioFileUrl] = useState()
+  const [captions, setCaptions] = useState()
 
   const onHandleInputChange = (fieldName, fieldValue) => {
     console.log(fieldName, fieldValue)
@@ -25,6 +27,13 @@ const CreateNew = () => {
       [fieldName]: fieldValue
     }));
   };
+
+  const onClickCreateHandler = () => {
+    GetVideoScript()
+    // GenerateAudioFile(scriptString)
+    // GenerateAudioCaption(FILEURL)
+  };
+
 
   //Get video script:
   const GetVideoScript = async () => {
@@ -48,23 +57,18 @@ const CreateNew = () => {
     setLoading(false);
   };
 
-  const onClickCreateHandler = () => {
-    // GetVideoScript()
-    GenerateAudioFile(scriptString)
-  };
 
-
-  // Accept the scriptData as a parameter
+  // Generate Audio File
   const GenerateAudioFile = async (scriptString) => {
     let script = '';
     const id = uuidv4();
 
     // Add an optional chaining (?.) just in case the API returns something unexpected
-    // scriptData?.forEach(item => {
-    //   const textChunk = item.contentText || item.ContentText || '';
-    //   script = script + textChunk + ' ';
-    // })
-    // console.log(script)
+    scriptData?.forEach(item => {
+      const textChunk = item.contentText || item.ContentText || '';
+      script = script + textChunk + ' ';
+    })
+    console.log(script)
 
     await axios.post('/api/generate-audio', {
       text: scriptString,
@@ -72,10 +76,39 @@ const CreateNew = () => {
     }).then(resp => {
       console.log(resp.data)
       setAudioFileUrl(resp.data.result)
+      resp.data.result && GenerateAudioCaption(resp.data.result)
     })
   }
 
+  //Generate audio Captions
+  const GenerateAudioCaption = async (fileUrl) => {
+    setLoading(true);
 
+    await axios.post('/api/generate-caption', {
+      audioFileUrl: fileUrl
+    }).then(resp => {
+      console.log(resp.data.result);
+      setCaptions(resp?.data?.result);
+    })
+
+    
+
+    console.log(videoScript,captions,audioFileUrl);
+  }
+
+  //Generate images
+  const GenerateImage = () =>{
+
+    videoScript.forEach(async(Element) =>{
+      await axios.post('/api/generate-image',{
+        prompt: Element?.imagePrompt || Element?.ImagePrompt
+      }).then(resp =>{
+        console.log(resp.data.result);
+      })
+    })
+
+    setLoading(false);
+  }
 
 
   return (
