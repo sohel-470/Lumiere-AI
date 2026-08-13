@@ -1,4 +1,6 @@
+import { storage } from '@/configs/FirebaseConfig';
 import { GoogleGenAI } from '@google/genai';
+import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { NextResponse } from 'next/server';
 
 
@@ -13,16 +15,10 @@ const model = 'gemini-3.1-flash-image';
 
 
 const generationConfig = {
-    maxOutputTokens: 32768,
-    temperature: 1,
-    topP: 0.95,
     responseModalities: ["IMAGE"],
-    thinkingConfig: {
-        thinkingLevel: "MINIMAL",
-    },
     imageConfig: {
         aspectRatio: "9:16",
-        imageSize: "1K",
+        imageSize: "512",
         outputMimeType: "image/png",
         personGeneration: "allow_all", // Added to bypass the adult-only filter
     },
@@ -40,9 +36,16 @@ export async function POST(req) {
     try {
 
         const { prompt } = await req.json();
+
+        // 4. TEST: Log the incoming prompt so you can see if it's undefined
+        console.log("Incoming Prompt:", prompt);
+
+        // 5. TEST: Temporarily force a 100% safe prompt to bypass the Scary Story horror filter
+        const safeTestPrompt = "A cinematic, highly detailed photograph of a cute fluffy golden retriever puppy playing in a bright green sunny park.";
+
         const response = await ai.models.generateContent({
             model: model,
-            contents: prompt,
+            contents: prompt,  // Using the hardcoded prompt for this test
             config: generationConfig,
         });
 
@@ -53,11 +56,20 @@ export async function POST(req) {
             return NextResponse.json({ error: "No image data returned" }, { status: 500 });
         }
 
-        // 4. Format as a Data URL so frontend handles it like a regular image URL
-        const imageUrl = `data:image/png;base64,${base64Data}`;
+        //Save to FireBase
+        const fileName = `lumiere-ai-files/${Date.now()}.png`
+        const storageRef = ref(storage, fileName)
+
+        // Upload the Base64 image to Firebase Storage; 'base64' tells Firebase how to decode the data,
+        // and contentType specifies that the resulting file is a PNG image.
+        await uploadString(storageRef, base64Data, 'base64', { contentType: 'image/png' });
+
+        //get download url from firebase
+        const downloadUrl = await getDownloadURL(storageRef);
+        console.log(downloadUrl)
 
         // 5. Return JSON to match what your frontend expects: { result: "..." }
-        return NextResponse.json({ result: imageUrl });
+        return NextResponse.json({ result: downloadUrl });
 
     } catch (error) {
         console.error("Error generating image:", error);

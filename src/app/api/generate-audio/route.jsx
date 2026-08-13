@@ -27,7 +27,7 @@ export async function POST(req) {
         // Construct the TTS request
         const request = {
             input: { text: text },
-            voice: { languageCode: 'en-US', ssmlGender: 'FEMALE' },
+            voice: { languageCode: 'en-US', ssmlGender: 'NEUTRAL' },
             audioConfig: { audioEncoding: 'MP3' },
         };
 
@@ -43,7 +43,7 @@ export async function POST(req) {
         const downloadUrl = await getDownloadURL(storageref);
 
         console.log(downloadUrl)
-        return NextResponse.json({ Result: downloadUrl });
+        return NextResponse.json({ result: downloadUrl });
 
     } catch (error) {
         // 3. Proper Error Handling
