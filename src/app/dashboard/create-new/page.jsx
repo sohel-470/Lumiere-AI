@@ -1,5 +1,5 @@
 'use client'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import SelectTopic from './_components/SelectTopic'
 import SelectStyle from './_components/SelectStyle'
 import SelectDuration from './_components/SelectDuration'
@@ -9,6 +9,9 @@ import axios from 'axios'
 import CustomLoading from './_components/CustomLoading'
 import { v4 as uuidv4 } from 'uuid';
 import { VideoDataContext } from '@/app/_context/VideoDataContext'
+import { useUser } from '@clerk/nextjs'
+import { db } from '@/configs/db'
+import { VideoTable } from '@/configs/schema'
 
 
 //   ============== TESTING DATA ==============
@@ -37,6 +40,7 @@ const CreateNew = () => {
   const [captions, setCaptions] = useState()
   const [imageList, setImageList] = useState()
   const { videoData, setVideoData } = useContext(VideoDataContext)
+  const { user } = useUser()
 
 
   const onHandleInputChange = (fieldName, fieldValue) => {
@@ -196,6 +200,44 @@ const CreateNew = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Safely check if all 4 required pieces of data have been generated and exist
+    const isReadyToSave =
+      videoData?.videoScript &&
+      videoData?.audioFileUrl &&
+      videoData?.captions &&
+      videoData?.imageList;
+
+    if (isReadyToSave) {
+      saveVideoData();
+    }
+  }, [videoData])
+
+  // Removed the 'videoData' parameter to prevent shadowing the context variable
+  const saveVideoData = async () => {
+    setLoading(true)
+
+    try {
+      // 1. Pass the imported SCHEMA TABLE to insert(), not the data object
+      const result = await db.insert(VideoTable).values({
+        script: videoData?.videoScript,
+        audioFileUrl: videoData?.audioFileUrl,
+        captions: videoData?.captions,
+        imageList: videoData?.imageList,
+        createdBy: user?.primaryEmailAddress?.emailAddress
+      })
+        // 2. Pass the SCHEMA COLUMN to returning(), not the state value
+        .returning({ id: VideoTable.id });
+
+      console.log("Save success:", result)
+    } catch (error) {
+      console.error("Failed to save to database:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
 
 
   return (
