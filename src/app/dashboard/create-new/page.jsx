@@ -12,6 +12,7 @@ import { VideoDataContext } from '@/app/_context/VideoDataContext'
 import { useUser } from '@clerk/nextjs'
 import { db } from '@/configs/db'
 import { VideoTable } from '@/configs/schema'
+import PlayerDialog from '../_components/PlayerDialog'
 
 
 //   ============== TESTING DATA ==============
@@ -41,6 +42,8 @@ const CreateNew = () => {
   const [imageList, setImageList] = useState()
   const { videoData, setVideoData } = useContext(VideoDataContext)
   const { user } = useUser()
+  const [playVideo, setPlayVideo] = useState(true)
+  const [videoId, setVideoId] = useState(1)
 
 
   const onHandleInputChange = (fieldName, fieldValue) => {
@@ -230,6 +233,9 @@ const CreateNew = () => {
         // 2. Pass the SCHEMA COLUMN to returning(), not the state value
         .returning({ id: VideoTable.id });
 
+        setVideoId(result[0].id)
+        setPlayVideo(true)
+
       console.log("Save success:", result)
     } catch (error) {
       console.error("Failed to save to database:", error)
@@ -258,38 +264,6 @@ const CreateNew = () => {
 
 
 
-      {/* 👇 IMAGE PREVIEW WITH MANUAL DOWNLOAD BUTTON 👇 */}
-      {imageList?.length > 0 && (
-        <div className='mt-8 p-8 md:p-10 bg-[#121212] border border-neutral-800 rounded-2xl shadow-2xl'>
-          <h3 className='text-xl font-bold text-white mb-6'>Generated Scenes</h3>
-
-          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6'>
-            {imageList.map((url, index) => (
-              <div key={index} className="flex flex-col gap-3">
-                {/* The Image */}
-                <img
-                  src={url}
-                  alt={`Generated frame ${index + 1}`}
-                  className='w-full object-cover aspect-[9/16] rounded-xl border border-neutral-700 shadow-md'
-                />
-
-                {/* The 100% Manual Download Button */}
-                <a
-                  href={url}
-                  download={`Generated_Scene_${index + 1}.png`}
-                  className="w-full py-3 bg-neutral-800 hover:bg-neutral-700 text-white text-sm text-center font-bold rounded-lg border border-neutral-600 transition-colors"
-                >
-                  📥 Download Image
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      {/* 👆 =============================================== 👆 */}
-
-
-
       {/* Floating Action Button Container */}
       {/* fixed to viewport, centered, pointer-events-none ensures clicks pass through the invisible wrapper */}
       <div className='fixed bottom-10 left-0 md:left-64 right-0 flex justify-center z-50 pointer-events-none'>
@@ -310,6 +284,8 @@ const CreateNew = () => {
         </Button>
       </div>
       <CustomLoading loading={loading} />
+
+      <PlayerDialog playVideo={playVideo} videoId={videoId} />
     </div>
   )
 }
