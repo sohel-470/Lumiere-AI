@@ -2,7 +2,7 @@ import { Audio } from '@remotion/media';
 import React, { useEffect } from 'react'
 import { AbsoluteFill, Img, interpolate, Sequence, useCurrentFrame, useVideoConfig } from 'remotion'
 
-const RemotionVideo = ({ script, audioFileUrl, captions, imageList, setDurationInFrame }) => {
+const RemotionVideo = ({ script, audioFileUrl, captions, imageList, setDurationInFrame, isThumbnail = false }) => {
     const { fps } = useVideoConfig();
     const frame = useCurrentFrame();
 
@@ -83,17 +83,19 @@ const RemotionVideo = ({ script, audioFileUrl, captions, imageList, setDurationI
                                     transform: `scale(${scale(index)})`
                                 }}
                             />
-                            <AbsoluteFill style={{
-                                color: 'white',
-                                justifyContent: 'center',
-                                textAlign: 'center',
-                                top: undefined,
-                                bottom: '30%',
-                                height: 150,
-                                width: '100%'
-                            }}>
-                                <h2 className='text-7xl'>{getCurrentCaption()}</h2>
-                            </AbsoluteFill>
+                            {!isThumbnail && (
+                                <AbsoluteFill style={{
+                                    color: 'white',
+                                    justifyContent: 'center',
+                                    textAlign: 'center',
+                                    top: undefined,
+                                    bottom: '30%',
+                                    height: 150,
+                                    width: '100%'
+                                }}>
+                                    <h2 className='text-7xl'>{getCurrentCaption()}</h2>
+                                </AbsoluteFill>
+                            )}
                         </AbsoluteFill>
                     </Sequence>
                 )

@@ -42,7 +42,7 @@ const CreateNew = () => {
   const [imageList, setImageList] = useState()
   const { videoData, setVideoData } = useContext(VideoDataContext)
   const { user } = useUser()
-  const [playVideo, setPlayVideo] = useState(true)
+  const [playVideo, setPlayVideo] = useState(false)
   const [videoId, setVideoId] = useState(1)
 
 
@@ -234,7 +234,7 @@ const CreateNew = () => {
         .returning({ id: VideoTable.id });
 
         setVideoId(result[0].id)
-        setPlayVideo(true)
+        setPlayVideo(Date.now())
 
       console.log("Save success:", result)
     } catch (error) {
