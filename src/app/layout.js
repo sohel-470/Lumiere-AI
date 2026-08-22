@@ -1,4 +1,5 @@
 import { ClerkProvider, Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
+import { dark } from '@clerk/themes'
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import Provider from './provider';
@@ -16,7 +17,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider appearance={{ baseTheme: dark }}>
       <html
         lang="en"
         className={outfit.className}

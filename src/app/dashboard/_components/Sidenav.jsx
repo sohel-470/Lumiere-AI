@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 const Sidenav = () => {
     // Pull the user details from context to get the real credit count
     const { userDetail } = useContext(UserDetailContext);
-    
+
     const MenuOption = [
         { id: 1, name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { id: 2, name: 'Create New', path: '/dashboard/create-new', icon: FolderPlus },
@@ -24,7 +24,9 @@ const Sidenav = () => {
         <div className='w-full h-full flex flex-col'>
             {/* Top: Logo */}
             <div className='p-2 mb-5 flex items-center justify-center'>
-                <Image src={"/logo.svg"} width={250} height={250} alt='logo' className=' cursor-pointer hover:opacity-80 transition-opacity' />
+                <Link href={'/'} className='cursor-pointer hover:opacity-80 transition-opacity'>
+                    <Image src={"/logo.svg"} width={250} height={250} alt='logo' />
+                </Link>
             </div>
 
             {/* Middle: Navigation */}
@@ -35,13 +37,13 @@ const Sidenav = () => {
                         <Link key={item.id} href={item.path}>
                             <div className={`flex items-center gap-4 py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer font-medium
                                 ${isActive
-                                     ? 'bg-[#ec0f6b]/10 text-[#ec0f6b] border border-[#ec0f6b]/20 shadow-[0_0_15px_rgba(236,15,107,0.05)]'
-                                     : 'text-neutral-400 hover:bg-neutral-900 hover:text-white border border-transparent'
+                                    ? 'bg-[#ec0f6b]/10 text-[#ec0f6b] border border-[#ec0f6b]/20 shadow-[0_0_15px_rgba(236,15,107,0.05)]'
+                                    : 'text-neutral-400 hover:bg-neutral-900 hover:text-white border border-transparent'
                                 }`}>
                                 <item.icon
-                                     size={22}
-                                     className={`transition-colors ${isActive ? 'text-[#ec0f6b]' : 'text-neutral-500'}`}
-                                 />
+                                    size={22}
+                                    className={`transition-colors ${isActive ? 'text-[#ec0f6b]' : 'text-neutral-500'}`}
+                                />
                                 <h2 className='tracking-wide'>{item.name}</h2>
                             </div>
                         </Link>
@@ -67,7 +69,7 @@ const Sidenav = () => {
             {/* Bottom: User Account Section */}
             <div className='p-5 border-t border-neutral-900 flex items-center gap-3 bg-[#0f0f0f]'>
                 <div className='border-2 border-neutral-800 rounded-full p-[2px] bg-black flex items-center justify-center shrink-0'>
-                    <UserButton afterSignOutUrl="/"/>
+                    <UserButton afterSignOutUrl="/" />
                 </div>
                 <div className='flex flex-col overflow-hidden'>
                     <span className='text-sm font-semibold text-white truncate'>My Account</span>
