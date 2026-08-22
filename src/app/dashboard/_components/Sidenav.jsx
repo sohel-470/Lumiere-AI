@@ -1,12 +1,17 @@
 'use client'
-import { CircleUser, FolderPlus, LayoutDashboard, Rocket } from 'lucide-react'
+import { CircleUser, FolderPlus, LayoutDashboard, Rocket, Gem } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import React from 'react'
+import React, { useContext } from 'react'
 import Image from 'next/image'
 import { UserButton } from '@clerk/nextjs'
+import { UserDetailContext } from '@/app/_context/UserDetailContext'
+import { Button } from '@/components/ui/button'
 
 const Sidenav = () => {
+    // Pull the user details from context to get the real credit count
+    const { userDetail } = useContext(UserDetailContext);
+    
     const MenuOption = [
         { id: 1, name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { id: 2, name: 'Create New', path: '/dashboard/create-new', icon: FolderPlus },
@@ -29,19 +34,34 @@ const Sidenav = () => {
                     return (
                         <Link key={item.id} href={item.path}>
                             <div className={`flex items-center gap-4 py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer font-medium
-                                ${isActive 
-                                    ? 'bg-[#ec0f6b]/10 text-[#ec0f6b] border border-[#ec0f6b]/20 shadow-[0_0_15px_rgba(236,15,107,0.05)]' 
-                                    : 'text-neutral-400 hover:bg-neutral-900 hover:text-white border border-transparent'
+                                ${isActive
+                                     ? 'bg-[#ec0f6b]/10 text-[#ec0f6b] border border-[#ec0f6b]/20 shadow-[0_0_15px_rgba(236,15,107,0.05)]'
+                                     : 'text-neutral-400 hover:bg-neutral-900 hover:text-white border border-transparent'
                                 }`}>
-                                <item.icon 
-                                    size={22} 
-                                    className={`transition-colors ${isActive ? 'text-[#ec0f6b]' : 'text-neutral-500'}`} 
-                                />
+                                <item.icon
+                                     size={22}
+                                     className={`transition-colors ${isActive ? 'text-[#ec0f6b]' : 'text-neutral-500'}`}
+                                 />
                                 <h2 className='tracking-wide'>{item.name}</h2>
                             </div>
                         </Link>
                     )
                 })}
+            </div>
+
+            {/* Bottom: Credits Section */}
+            <div className='px-4 mb-4'>
+                <div className='bg-[#0f0f0f] border border-neutral-800 rounded-2xl p-4'>
+                    <div className='flex items-center gap-2 mb-4'>
+                        <Gem className='text-[#ec0f6b]' size={18} />
+                        <span className='text-sm font-medium text-white'>
+                            Remaining Credits: {userDetail?.credits || 0}
+                        </span>
+                    </div>
+                    <Button className='w-full bg-white hover:bg-neutral-200 text-black font-semibold rounded-xl transition-all'>
+                        Add Credits
+                    </Button>
+                </div>
             </div>
 
             {/* Bottom: User Account Section */}
@@ -57,4 +77,5 @@ const Sidenav = () => {
         </div>
     )
 }
+
 export default Sidenav

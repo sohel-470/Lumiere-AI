@@ -11,8 +11,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { VideoDataContext } from '@/app/_context/VideoDataContext'
 import { useUser } from '@clerk/nextjs'
 import { db } from '@/configs/db'
-import { VideoTable } from '@/configs/schema'
+import { Users, VideoTable } from '@/configs/schema'
 import PlayerDialog from '../_components/PlayerDialog'
+import { UserDetailContext } from '@/app/_context/UserDetailContext'
+import { eq } from 'drizzle-orm'
+import { toast } from 'sonner'
 
 
 //   ============== TESTING DATA ==============
@@ -44,6 +47,7 @@ const CreateNew = () => {
   const { user } = useUser()
   const [playVideo, setPlayVideo] = useState(false)
   const [videoId, setVideoId] = useState(1)
+  const { userDetail, setUserDetail } = useContext(UserDetailContext)
 
 
   const onHandleInputChange = (fieldName, fieldValue) => {
@@ -55,7 +59,14 @@ const CreateNew = () => {
   };
 
   const onClickCreateHandler = () => {
-    GetVideoScript()
+    // Check if userDetail is loaded and credits are at least 100
+    // if ((userDetail?.credits ?? 0) < 100) {
+    if (true) {
+      toast.error("Not enough credits to generate a video. Please add more credits.", { position: "top-right" });
+      return;
+    }
+
+    GetVideoScript();
     // GenerateAudioFile(scriptString)
     // GenerateAudioCaption(FILEURL)
     // GenerateImage()
@@ -233,8 +244,9 @@ const CreateNew = () => {
         // 2. Pass the SCHEMA COLUMN to returning(), not the state value
         .returning({ id: VideoTable.id });
 
-        setVideoId(result[0].id)
-        setPlayVideo(Date.now())
+      await UpdateUsercredits()
+      setVideoId(result[0].id)
+      setPlayVideo(Date.now())
 
       console.log("Save success:", result)
     } catch (error) {
@@ -244,6 +256,28 @@ const CreateNew = () => {
     }
   }
 
+
+  //updating users credits after a successful video generation
+  const UpdateUsercredits = async () => {
+    const currentCredits = userDetail?.credits ?? 0;
+    const newCredits = Math.max(0, currentCredits - 100);
+
+    const result = await db
+      .update(Users)
+      .set({
+        credits: newCredits,
+      })
+      .where(eq(Users.email, user?.primaryEmailAddress?.emailAddress));
+
+    console.log(result);
+
+    setUserDetail((prev) => ({
+      ...prev,
+      credits: newCredits,
+    }));
+
+    setVideoData(null);
+  };
 
 
   return (
@@ -278,7 +312,7 @@ const CreateNew = () => {
 
           {/* Subtle sub-text to match your reference design */}
           <span className='text-xs font-normal text-white/70'>
-            200 Credits to Generate Video
+            100 Credits to Generate Video
           </span>
 
         </Button>
