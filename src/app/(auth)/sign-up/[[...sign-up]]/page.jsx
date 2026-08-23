@@ -36,7 +36,7 @@ export default function SignUpPage() {
       {/* Top Navigation */}
       <header className="absolute top-0 left-0 w-full p-8 z-30 flex items-center justify-between">
         <Link href="/" className="hover:opacity-80 transition-opacity">
-          <Image src="/logo.svg" width={140} height={40} alt="Lumiere AI Logo" />
+          <Image src="/logo1.svg" width={140} height={40} alt="Lumiere AI Logo" />
         </Link>
       </header>
 

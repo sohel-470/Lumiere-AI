@@ -63,7 +63,7 @@ export default function Home() {
   }, [displayText, isDeleting, loopNum, typingSpeed, phrases]);
 
   return (
-    <div className="relative min-h-screen bg-black text-white overflow-hidden font-sans select-none">
+    <div className="relative h-screen bg-black text-white overflow-hidden font-sans select-none">
       
       {/* --- BACKGROUND MARQUEE --- */}
       <div className="absolute inset-0 z-0 flex flex-col justify-center">
@@ -94,9 +94,9 @@ export default function Home() {
       {/* <div className="absolute bottom-[-20%] left-[-10%] w-[40vw] h-[40vw] bg-[#ec0f6b]/10 rounded-full blur-[150px] pointer-events-none z-10" /> */}
 
       {/* --- NAVIGATION --- */}
-      <header className="relative z-50 flex items-center justify-between p-6 md:px-12">
+      <header className="absolute top-0 left-0 w-full z-50 flex items-center justify-between p-8 md:px-5 pt-5">
         <Link href="/" className="hover:opacity-80 transition-opacity">
-          <Image src="/logo.svg" width={260} height={260} alt="Lumiere AI Logo" />
+          <Image src="/logo1.svg" width={260} height={74} alt="Lumiere AI Logo" />
         </Link>
         
         <div className="flex items-center gap-6">

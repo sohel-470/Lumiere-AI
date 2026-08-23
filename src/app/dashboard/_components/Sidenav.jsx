@@ -15,7 +15,7 @@ const Sidenav = () => {
     const MenuOption = [
         { id: 1, name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { id: 2, name: 'Create New', path: '/dashboard/create-new', icon: FolderPlus },
-        { id: 3, name: 'Upgrade', path: '/upgrade', icon: Rocket },
+        { id: 3, name: 'Upgrade', path: '/dashboard/upgrade', icon: Rocket },
         { id: 4, name: 'Account', path: '/account', icon: CircleUser }
     ]
     const path = usePathname()
@@ -25,7 +25,7 @@ const Sidenav = () => {
             {/* Top: Logo */}
             <div className='p-2 mb-5 flex items-center justify-center'>
                 <Link href={'/'} className='cursor-pointer hover:opacity-80 transition-opacity'>
-                    <Image src={"/logo.svg"} width={250} height={250} alt='logo' />
+                    <Image src={"/logo1.svg"} width={250} height={72} alt='logo' />
                 </Link>
             </div>
 
@@ -60,9 +60,11 @@ const Sidenav = () => {
                             Remaining Credits: {userDetail?.credits || 0}
                         </span>
                     </div>
-                    <Button className='w-full bg-white hover:bg-neutral-200 text-black font-semibold rounded-xl transition-all'>
-                        Add Credits
-                    </Button>
+                    <Link href="/dashboard/upgrade">
+                        <Button className='w-full bg-white hover:bg-neutral-200 text-black font-semibold rounded-xl transition-all'>
+                            Add Credits
+                        </Button>
+                    </Link>
                 </div>
             </div>
 

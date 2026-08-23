@@ -34,9 +34,10 @@ export default function SignInPage() {
       <div className="absolute bottom-[-10%] right-[-5%] w-[45vw] h-[45vw] bg-[#ec0f6b]/5 rounded-full mix-blend-screen blur-[120px] pointer-events-none"></div>
 
       {/* Top Navigation */}
-      <header className="absolute top-0 left-0 w-full p-8 z-30 flex items-center justify-between">
+      {/* <header className="absolute top-0 left-0 w-full p-8 z-30 flex items-center justify-between"> */}
+      <header className="absolute top-0 left-0 w-full z-50 flex items-center justify-between p-8 md:px-5 pt-5">
         <Link href="/" className="hover:opacity-80 transition-opacity">
-          <Image src="/logo.svg" width={140} height={40} alt="Lumiere AI Logo" />
+          <Image src="/logo1.svg" width={260} height={74} alt="Lumiere AI Logo" />
         </Link>
       </header>
 
