@@ -1,5 +1,5 @@
 'use client'
-import { CircleUser, FolderPlus, LayoutDashboard, Rocket, Gem } from 'lucide-react'
+import { CircleUser, FolderPlus, LayoutDashboard, Rocket, Gem, Globe } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useContext } from 'react'
@@ -15,8 +15,9 @@ const Sidenav = () => {
     const MenuOption = [
         { id: 1, name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { id: 2, name: 'Create New', path: '/dashboard/create-new', icon: FolderPlus },
-        { id: 3, name: 'Upgrade', path: '/dashboard/upgrade', icon: Rocket },
-        { id: 4, name: 'Account', path: '/account', icon: CircleUser }
+        { id: 3, name: 'Community', path: '/dashboard/community', icon: Globe },
+        { id: 4, name: 'Upgrade', path: '/dashboard/upgrade', icon: Rocket },
+        { id: 5, name: 'Account', path: '/dashboard/account', icon: CircleUser }
     ]
     const path = usePathname()
 
