@@ -11,12 +11,31 @@ import CustomLoading from './_components/CustomLoading'
 import { v4 as uuidv4 } from 'uuid'
 import { VideoDataContext } from '@/app/_context/VideoDataContext'
 import { useUser } from '@clerk/nextjs'
-import { db } from '@/configs/db'
-import { Users, VideoTable } from '@/configs/schema'
 import PlayerDialog from '../_components/PlayerDialog'
 import { UserDetailContext } from '@/app/_context/UserDetailContext'
-import { eq } from 'drizzle-orm'
 import { toast } from 'sonner'
+import { saveVideoDataAction, UpdateUserCreditsAction } from '@/app/actions'
+
+
+
+// ============== TESTING DATA ==============
+const scriptString = "Think history is boring? Think again! Here are three historical facts that sound fake but are 100% true. First up: Ancient Romans used human urine as mouthwash! They believed the ammonia kept their teeth pearly white. In 1932, the Australian military declared war on Emus... and the birds actually won! Mind blown: Cleopatra lived closer to the invention of the iPhone than to the building of the Great Pyramid of Giza. And finally, the ancient Mayans didn't just eat turkeys; they worshipped them as symbols of power and prestige! History is wild! Hit that follow button for more mind-blowing facts every day! "
+const FILEURL = 'https://firebasestorage.googleapis.com/v0/b/lumiere-ai-fe65e.firebasestorage.app/o/lumiere-ai-files%2Ffbb27256-c943-42b2-9a93-aa5a53a09513.mp3?alt=media&token=c1339400-8626-4f22-99de-8173dfcbf548'
+const testVideoScript = [
+  {
+    "scene": 1,
+    "imagePrompt": "A cinematic, ultra-wide shot looking out the window of a sleek, futuristic high-speed train. Outside, a beautiful bioluminescent forest glows with soft neon blue and purple lights. High-end sci-fi aesthetic, pristine and clean, highly detailed, 8k resolution, photorealistic.",
+    "ContentText": "The evening hyper-loop journey was always my favorite part of the day."
+  },
+  {
+    "scene": 2,
+    "imagePrompt": "A close-up of a futuristic, floating holographic compass resting on a smooth metallic table. Clean, high-end sci-fi interface design with glowing cyan geometric lines. No glitch effects, perfectly smooth and pristine, cinematic lighting, photorealistic, 8k.",
+    "ContentText": "But today, the navigation interface locked onto a set of coordinates that shouldn't exist."
+  }
+]
+// ============== TESTING DATA ==============
+
+
 
 const CreateNew = () => {
   const [formData, setFormData] = useState({ aspectRatio: '9:16' })
@@ -76,7 +95,6 @@ const CreateNew = () => {
       const textChunk = item.contentText || item.ContentText || '';
       script = script + textChunk + ' ';
     });
-
     try {
       const resp = await axios.post('/api/generate-audio', {
         text: script,
@@ -124,7 +142,6 @@ const CreateNew = () => {
       for (const Element of scriptDataArray) {
         const promptText = Element?.imagePrompt || Element?.ImagePrompt;
         if (!promptText) continue;
-
         try {
           const resp = await axios.post('/api/generate-image', {
             prompt: promptText,
@@ -136,14 +153,11 @@ const CreateNew = () => {
           console.error("Skipped an image due to backend error:", promptText);
         }
       }
-
-      // --- SAFEGUARD ---
       if (images.length === 0) {
         toast.error("Failed to generate visuals. The prompt might have triggered safety filters. Please try a different topic.");
         setLoading(false);
-        return; // Abort here! Do not update videoData.
+        return; 
       }
-
       setVideoData(prev => ({
         ...prev,
         imageList: images
@@ -156,32 +170,29 @@ const CreateNew = () => {
   };
 
   useEffect(() => {
-    // STRICT CHECK: Ensure arrays actually have items in them
     const isReadyToSave =
       videoData?.videoScript?.length > 0 &&
       videoData?.audioFileUrl &&
       videoData?.captions?.length > 0 &&
       videoData?.imageList?.length > 0;
-
     if (isReadyToSave) {
       saveVideoData();
     }
   }, [videoData]);
 
+
+  // --- REFACTORED: Now uses Server Action to save video ---
   const saveVideoData = async () => {
     setLoading(true);
     try {
-      const result = await db.insert(VideoTable).values({
-        script: videoData?.videoScript,
-        audioFileUrl: videoData?.audioFileUrl,
-        captions: videoData?.captions,
-        imageList: videoData?.imageList,
-        createdBy: user?.primaryEmailAddress?.emailAddress,
-        format: formData.aspectRatio || '9:16'
-      }).returning({ id: VideoTable.id });
+      const newVideoId = await saveVideoDataAction(
+        videoData, 
+        user?.primaryEmailAddress?.emailAddress, 
+        formData.aspectRatio
+      );
 
       await UpdateUsercredits();
-      setVideoId(result[0].id);
+      setVideoId(newVideoId);
       setPlayVideo(Date.now());
     } catch (error) {
       console.error("Failed to save to database:", error);
@@ -190,13 +201,14 @@ const CreateNew = () => {
     }
   };
 
+  // --- REFACTORED: Now uses Server Action to update credits ---
   const UpdateUsercredits = async () => {
     const currentCredits = userDetail?.credits ?? 0;
-    const newCredits = Math.max(0, currentCredits - 100);
-    await db
-      .update(Users)
-      .set({ credits: newCredits })
-      .where(eq(Users.email, user?.primaryEmailAddress?.emailAddress));
+    
+    const newCredits = await UpdateUserCreditsAction(
+      user?.primaryEmailAddress?.emailAddress, 
+      currentCredits
+    );
 
     setUserDetail((prev) => ({
       ...prev,
@@ -214,47 +226,17 @@ const CreateNew = () => {
           Configure your prompt, style, format, and let AI bring your narrative to life.
         </p>
       </div>
-
       {/* Main Form Container */}
       <div className='p-8 md:p-10 bg-[#121212]/70 backdrop-blur-xl border border-neutral-800/80 rounded-[28px] shadow-[0_0_50px_rgba(0,0,0,0.5)]'>
-        {/* 1. Content / Prompt */}
         <SelectTopic onUserSelect={onHandleInputChange} />
-
         <div className='w-full h-px bg-neutral-800/60 my-10'></div>
-
-        {/* 2. Visual Style */}
         <SelectStyle onUserSelect={onHandleInputChange} />
-
         <div className='w-full h-px bg-neutral-800/60 my-10'></div>
-
-        {/* 3. Aspect Ratio & Format */}
         <SelectAspectRatio onUserSelect={onHandleInputChange} />
-
         <div className='w-full h-px bg-neutral-800/60 my-10'></div>
-
-        {/* 4. Duration */}
         <SelectDuration onUserSelect={onHandleInputChange} />
       </div>
 
-      {/* Bottom Docked Floating Action Bar */}
-      {/* <div className='fixed bottom-6 left-0 md:left-64 right-0 flex justify-center z-40 pointer-events-none px-4'>
-        <div className='pointer-events-auto bg-[#121212]/90 backdrop-blur-xl border border-neutral-800/90 rounded-2xl p-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.8)]'>
-          <Button
-            onClick={onClickCreateHandler}
-            disabled={loading}
-            className='flex items-center gap-3 bg-[#ec0f6b] hover:bg-[#d00d5e] text-white py-6 px-10 md:px-14 rounded-xl shadow-[0_0_25px_rgba(236,15,107,0.4)] hover:shadow-[0_0_35px_rgba(236,15,107,0.6)] transition-all cursor-pointer'
-          >
-            <Sparkles size={20} className='animate-pulse' />
-            <div className='text-left'>
-              <div className='font-bold text-base leading-none'>Generate Video</div>
-              <span className='text-[11px] font-normal text-white/80 leading-tight'>100 Credits per generation</span>
-            </div>
-          </Button>
-        </div>
-      </div> */}
-
-      {/* Floating Action Button Container */}
-      {/* fixed to viewport, centered, pointer-events-none ensures clicks pass through the invisible wrapper */}
       <div className='fixed bottom-10 left-0 md:left-64 right-0 flex justify-center z-50 pointer-events-none'>
         <Button className='pointer-events-auto flex flex-col items-center justify-center gap-1 bg-[#ec0f6b] hover:bg-[#d00d5e] text-white py-8 px-16 md:px-32 rounded-2xl shadow-[0px_10px_40px_rgba(236,15,107,0.9)] hover:shadow-[0_15px_50px_rgba(236,15,107,0.6)] transition-all duration-300 hover:-translate-y-2' onClick={onClickCreateHandler}>
           <div className='flex items-center gap-2 text-xl font-bold'>
@@ -266,11 +248,9 @@ const CreateNew = () => {
           </span>
         </Button>
       </div>
-
       <CustomLoading loading={loading} />
       <PlayerDialog playVideo={playVideo} videoId={videoId} />
     </div>
   )
 }
-
 export default CreateNew

@@ -6,10 +6,11 @@ import React, { useState } from 'react'
 const SelectStyle = ({ onUserSelect }) => {
     const styleOptions = [
         { name: 'Realistic', image: '/realistic.jpg' },
-        { name: 'Cartoon', image: '/cartoon.webp' },
-        { name: 'Comic', image: '/comic.jpg' },
-        { name: 'Water Colour', image: '/watercolour.jpg' },
-        { name: 'GTA', image: '/gta.jpg' },
+        { name: 'Cartoon', image: '/marquee-4.avif' },
+        { name: 'Synthwave', image: '/synthwave.jpg' },
+        { name: '3D Pixar', image: '/3d-pixar.png' },
+        { name: 'Anime', image: '/anime.webp' },
+        { name: 'Ghibli', image: '/ghibli.jpg' },
     ]
     const [selectedOption, setSelectedOption] = useState()
 

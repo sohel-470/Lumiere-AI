@@ -3,19 +3,16 @@ import { Button } from '@/components/ui/button'
 import React, { useEffect, useState, useContext } from 'react' // Added useContext
 import EmptyState from './_components/EmptyState'
 import Link from 'next/link'
-import { db } from '@/configs/db'
-import { VideoTable } from '@/configs/schema'
 import { useUser } from '@clerk/nextjs'
 import VideoList from './_components/VideoList'
-import { eq, desc } from 'drizzle-orm'
 import { UserDetailContext } from '../_context/UserDetailContext' // Imported context
+import { GetVideoListAction } from '@/app/actions'
 
 const Dashboard = () => {
   const { user } = useUser();
   const [videoList, setVideoList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Bring in the user details from context to access real credits
   const { userDetail } = useContext(UserDetailContext);
 
   useEffect(() => {
@@ -25,7 +22,7 @@ const Dashboard = () => {
   const GetVideoList = async () => {
     setIsLoading(true); 
     try {
-      const result = await db.select().from(VideoTable).where(eq(VideoTable?.createdBy, user?.primaryEmailAddress?.emailAddress)).orderBy(desc(VideoTable.id));;
+      const result = await GetVideoListAction(user?.primaryEmailAddress?.emailAddress);
       setVideoList(result);
     } catch (error) {
       console.error("Failed to fetch videos:", error);

@@ -17,12 +17,13 @@ const phrases = [
 
 const marqueeImages = [
   "/marquee-1.jpg",
-  "/marquee-6.jpg",
   "/marquee-4.avif",
-  "/marquee-3.jpg",
+  "/marquee-6.jpg",
   "/marquee-7.jpg",
-  "/marquee-8.jpg",
   "/marquee-2.jpg",
+  "/marquee-8.jpg",
+  "/marquee-5.jpg",
+  "/marquee-3.jpg",
 ];
 
 export default function Home() {
@@ -119,7 +120,7 @@ export default function Home() {
       </header>
 
       {/* --- HERO CONTENT --- */}
-      <main className="relative z-20 flex flex-col items-center top-65 md:top-45 min-h-[80dvh] px-4 text-center">
+      <main className="relative z-20 flex flex-col items-center top-[30dvh] md:top-[20dvh] min-h-[80dvh] px-4 text-center">
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 max-w-5xl leading-tight">
           Create Stunning Movies & Episodes With <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ec0f6b] to-[#ff7eb3]">

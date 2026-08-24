@@ -1,10 +1,8 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { db } from '@/configs/db'
-import { VideoTable } from '@/configs/schema'
-import { desc } from 'drizzle-orm'
 import VideoList from '../_components/VideoList'
 import { Globe, Sparkles } from 'lucide-react'
+import { GetAllCommunityVideosAction } from '@/app/actions'
 
 const Community = () => {
     const [videoList, setVideoList] = useState([])
@@ -18,7 +16,7 @@ const Community = () => {
         setIsLoading(true)
         try {
             // Fetch all videos from the table, ordered by newest first
-            const result = await db.select().from(VideoTable).orderBy(desc(VideoTable.id))
+            const result = await GetAllCommunityVideosAction();
             setVideoList(result)
         } catch (error) {
             console.error("Failed to fetch community videos:", error)

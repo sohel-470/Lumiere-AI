@@ -12,7 +12,7 @@ import {
 import { FileText } from 'lucide-react'
 
 const SelectTopic = ({ onUserSelect }) => {
-    const options = ['Custom Prompt', 'Random AI Story', 'Scary Story', 'Historical Facts', 'Bed Time Story', 'Motivational', 'Fun Facts']
+    const options = ['Custom Prompt', 'Random AI Story', 'Robotics', 'Historical Facts', 'Bed Time Story', 'Motivational', 'Fun Facts']
 
     const [selectedOption, setSelectedOption] = useState()
 

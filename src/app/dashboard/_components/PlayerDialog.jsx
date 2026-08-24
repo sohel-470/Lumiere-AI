@@ -4,10 +4,9 @@ import { renderMediaOnWeb } from '@remotion/web-renderer'; // Import the web ren
 import { toast } from "sonner"; // Ensure toast is imported for notifications
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import RemotionVideo from './RemotionVideo';
-import { VideoTable } from '@/configs/schema';
-import { eq } from 'drizzle-orm';
-import { db } from '@/configs/db';
 import { Button } from "@/components/ui/button";
+import { GetVideoDataAction } from '@/app/actions'
+
 
 function PlayerDialog({ playVideo, videoId }) {
     const [openDialog, setOpenDialog] = useState(false)
@@ -31,8 +30,8 @@ function PlayerDialog({ playVideo, videoId }) {
 
 
     const GetVideoData = async () => {
-        const result = await db.select().from(VideoTable).where(eq(VideoTable.id, videoId));
-        setVideoData(result[0])
+        const result = await GetVideoDataAction(videoId);
+        setVideoData(result)
     }
 
     const exportVideo = async () => {
