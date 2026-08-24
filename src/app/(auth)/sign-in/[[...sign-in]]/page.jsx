@@ -34,10 +34,9 @@ export default function SignInPage() {
       <div className="absolute bottom-[-10%] right-[-5%] w-[45vw] h-[45vw] bg-[#ec0f6b]/5 rounded-full mix-blend-screen blur-[120px] pointer-events-none"></div>
 
       {/* Top Navigation */}
-      {/* <header className="absolute top-0 left-0 w-full p-8 z-30 flex items-center justify-between"> */}
-      <header className="absolute top-0 left-0 w-full z-50 flex items-center justify-between p-8 md:px-5 pt-5">
+      <header className="absolute top-0 left-0 w-full z-50 flex items-center justify-between p-6 md:px-5 pt-5">
         <Link href="/" className="hover:opacity-80 transition-opacity">
-          <Image src="/logo1.svg" width={260} height={74} alt="Lumiere AI Logo" />
+          <Image src="/logo1.svg" width={200} height={57} alt="Lumiere AI Logo" className="md:w-[260px] md:h-[74px] object-contain" />
         </Link>
       </header>
 
@@ -88,7 +87,7 @@ export default function SignInPage() {
                 dividerRow: '!my-4',
                 socialButtonsBlockButton: '!bg-transparent hover:!bg-white/5 !text-white !border !border-white/10 !shadow-none !transition-all !rounded-xl !py-3.5',
                 socialButtonsBlockButtonText: '!font-medium !text-white !text-sm',
-                
+
                 // Cleaned out the useless watermark overrides
                 footerActionText: '!text-neutral-400 !font-medium',
                 footerActionLink: '!text-white hover:!text-neutral-300 !font-semibold !transition-colors',
