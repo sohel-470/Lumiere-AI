@@ -7,7 +7,7 @@ import { db } from '@/configs/db'
 import { VideoTable } from '@/configs/schema'
 import { useUser } from '@clerk/nextjs'
 import VideoList from './_components/VideoList'
-import { eq } from 'drizzle-orm'
+import { eq, desc } from 'drizzle-orm'
 import { UserDetailContext } from '../_context/UserDetailContext' // Imported context
 
 const Dashboard = () => {
@@ -25,7 +25,7 @@ const Dashboard = () => {
   const GetVideoList = async () => {
     setIsLoading(true); 
     try {
-      const result = await db.select().from(VideoTable).where(eq(VideoTable?.createdBy, user?.primaryEmailAddress?.emailAddress));
+      const result = await db.select().from(VideoTable).where(eq(VideoTable?.createdBy, user?.primaryEmailAddress?.emailAddress)).orderBy(desc(VideoTable.id));;
       setVideoList(result);
     } catch (error) {
       console.error("Failed to fetch videos:", error);
@@ -70,7 +70,7 @@ const Dashboard = () => {
           <EmptyState /> 
         </div>
       ) : (
-        <VideoList videoList={videoList} />
+        <VideoList videoList={videoList} refreshData={GetVideoList} />
       )}
     </div>
   )

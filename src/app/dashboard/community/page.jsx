@@ -66,7 +66,7 @@ const Community = () => {
                 </div>
             ) : (
                 // Reusing your existing VideoList component directly!
-                <VideoList videoList={videoList} /> 
+                <VideoList refreshData={GetAllCommunityVideos} videoList={videoList} />
             )}
         </div>
     )

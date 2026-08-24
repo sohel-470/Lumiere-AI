@@ -3,11 +3,12 @@ import React, { useContext, useState, useEffect } from 'react'
 import SelectTopic from './_components/SelectTopic'
 import SelectStyle from './_components/SelectStyle'
 import SelectDuration from './_components/SelectDuration'
+import SelectAspectRatio from './_components/SelectAspectRatio'
 import { Button } from '@/components/ui/button'
 import { Sparkles } from 'lucide-react'
 import axios from 'axios'
 import CustomLoading from './_components/CustomLoading'
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid'
 import { VideoDataContext } from '@/app/_context/VideoDataContext'
 import { useUser } from '@clerk/nextjs'
 import { db } from '@/configs/db'
@@ -17,27 +18,8 @@ import { UserDetailContext } from '@/app/_context/UserDetailContext'
 import { eq } from 'drizzle-orm'
 import { toast } from 'sonner'
 
-
-//   ============== TESTING DATA ==============
-const scriptString = "Think history is boring? Think again! Here are three historical facts that sound fake but are 100% true. First up: Ancient Romans used human urine as mouthwash! They believed the ammonia kept their teeth pearly white. In 1932, the Australian military declared war on Emus... and the birds actually won! Mind blown: Cleopatra lived closer to the invention of the iPhone than to the building of the Great Pyramid of Giza. And finally, the ancient Mayans didn't just eat turkeys; they worshipped them as symbols of power and prestige! History is wild! Hit that follow button for more mind-blowing facts every day! "
-const FILEURL = 'https://firebasestorage.googleapis.com/v0/b/lumiere-ai-fe65e.firebasestorage.app/o/lumiere-ai-files%2Ffbb27256-c943-42b2-9a93-aa5a53a09513.mp3?alt=media&token=c1339400-8626-4f22-99de-8173dfcbf548'
-const testVideoScript = [
-  {
-    "scene": 1,
-    "imagePrompt": "A cinematic, ultra-wide shot looking out the window of a sleek, futuristic high-speed train. Outside, a beautiful bioluminescent forest glows with soft neon blue and purple lights. High-end sci-fi aesthetic, pristine and clean, highly detailed, 8k resolution, photorealistic.",
-    "ContentText": "The evening hyper-loop journey was always my favorite part of the day."
-  },
-  {
-    "scene": 2,
-    "imagePrompt": "A close-up of a futuristic, floating holographic compass resting on a smooth metallic table. Clean, high-end sci-fi interface design with glowing cyan geometric lines. No glitch effects, perfectly smooth and pristine, cinematic lighting, photorealistic, 8k.",
-    "ContentText": "But today, the navigation interface locked onto a set of coordinates that shouldn't exist."
-  }
-];
-//   ============== TESTING DATA ==============
-
-
 const CreateNew = () => {
-  const [formData, setFormData] = useState({})
+  const [formData, setFormData] = useState({ aspectRatio: '9:16' })
   const [loading, setLoading] = useState(false)
   const [videoScript, setVideoScript] = useState()
   const [audioFileUrl, setAudioFileUrl] = useState()
@@ -49,9 +31,7 @@ const CreateNew = () => {
   const [videoId, setVideoId] = useState(1)
   const { userDetail, setUserDetail } = useContext(UserDetailContext)
 
-
   const onHandleInputChange = (fieldName, fieldValue) => {
-    console.log(fieldName, fieldValue)
     setFormData(prev => ({
       ...prev,
       [fieldName]: fieldValue
@@ -59,19 +39,12 @@ const CreateNew = () => {
   };
 
   const onClickCreateHandler = () => {
-    // Check if userDetail is loaded and credits are at least 100
-    // if ((userDetail?.credits ?? 0) < 100) {
-    if (true) {
+    if ((userDetail?.credits ?? 0) < 100) {
       toast.error("Not enough credits to generate a video. Please add more credits.", { position: "top-right" });
       return;
     }
-
     GetVideoScript();
-    // GenerateAudioFile(scriptString)
-    // GenerateAudioCaption(FILEURL)
-    // GenerateImage()
   };
-
 
   // 1. Get video script
   const GetVideoScript = async () => {
@@ -82,69 +55,48 @@ const CreateNew = () => {
         imageStyle: formData.imageStyle,
         duration: formData.duration
       });
-
       const scriptData = resp.data.result;
-
       setVideoData(prev => ({
         ...prev,
-        'videoScript': scriptData
-      }))
-
+        videoScript: scriptData
+      }));
       setVideoScript(scriptData);
-
-      // LOGGING THE RAW SCRIPT ARRAY
-      console.log("1. RAW SCRIPT DATA RECEIVED:", scriptData);
       GenerateAudioFile(scriptData);
-
     } catch (e) {
       console.error("Error generating script:", e);
       setLoading(false);
     }
   };
 
-
   // 2. Generate Audio File
   const GenerateAudioFile = async (scriptDataArray) => {
     let script = '';
     const id = uuidv4();
-
     scriptDataArray?.forEach(item => {
       const textChunk = item.contentText || item.ContentText || '';
       script = script + textChunk + ' ';
     });
-
-    // LOGGING THE EXACT TEXT BEING SENT TO GOOGLE/ELEVENLABS
-    console.log("2A. COMBINED SCRIPT TEXT:", script);
 
     try {
       const resp = await axios.post('/api/generate-audio', {
         text: script,
         id: id
       });
-
       setVideoData(prev => ({
         ...prev,
-        'audioFileUrl': resp.data.result
-      }))
-
+        audioFileUrl: resp.data.result
+      }));
       setAudioFileUrl(resp.data.result);
-
-      // LOGGING THE AUDIO MP3 URL
-      console.log("2B. AUDIO FILE URL RECEIVED:", resp.data.result);
-
       if (resp.data.result) {
         GenerateAudioCaption(resp.data.result, scriptDataArray);
       } else {
-        // FAIL-SAFE: Kill the spinner if the API returns undefined
-        console.error("Audio API failed to return a URL. Stopping pipeline.");
         setLoading(false);
       }
     } catch (e) {
       console.error("Error generating audio:", e);
       setLoading(false);
     }
-  }
-
+  };
 
   // 3. Generate audio Captions
   const GenerateAudioCaption = async (fileUrl, scriptDataArray) => {
@@ -152,175 +104,173 @@ const CreateNew = () => {
       const resp = await axios.post('/api/generate-caption', {
         audioFileUrl: fileUrl
       });
-
       setVideoData(prev => ({
         ...prev,
-        'captions': resp.data.result
-      }))
-
+        captions: resp.data.result
+      }));
       setCaptions(resp?.data?.result);
-
-      // LOGGING THE ENTIRE CAPTIONS JSON/ARRAY
-      console.log("3. CAPTIONS DATA RECEIVED:", resp?.data?.result);
       GenerateImage(scriptDataArray);
     } catch (e) {
       console.error("Error generating captions:", e);
       setLoading(false);
     }
-  }
-
+  };
 
   // 4. Generate images
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
   const GenerateImage = async (scriptDataArray) => {
     let images = [];
-
-    // The outer try/catch handles fatal pipeline errors
     try {
       for (const Element of scriptDataArray) {
         const promptText = Element?.imagePrompt || Element?.ImagePrompt;
         if (!promptText) continue;
 
-        // ✅ NEW: Put a try/catch INSIDE the loop for each individual image!
         try {
           const resp = await axios.post('/api/generate-image', {
-            prompt: promptText
+            prompt: promptText,
+            aspectRatio: formData.aspectRatio || '9:16'
           });
-
-          console.log("IMAGE GENERATED:", resp.data.result);
           images.push(resp.data.result);
-
           await delay(3000);
-
         } catch (imageError) {
-          // If ONE image fails (like a 500 error), it just logs it and moves to the next one!
           console.error("Skipped an image due to backend error:", promptText);
         }
       }
 
-      console.log("4. FINAL PIPELINE SUCCESS! ALL IMAGES:", images);
-      console.log("FINAL SCRIPT DATA USED:", scriptDataArray);
+      // --- SAFEGUARD ---
+      if (images.length === 0) {
+        toast.error("Failed to generate visuals. The prompt might have triggered safety filters. Please try a different topic.");
+        setLoading(false);
+        return; // Abort here! Do not update videoData.
+      }
 
       setVideoData(prev => ({
         ...prev,
-        'imageList': images
-      }))
-
+        imageList: images
+      }));
       setImageList(images);
-
     } catch (error) {
-      console.error("Failed to execute image generation pipeline:", error);
-    } finally {
+      console.error("Failed image generation:", error);
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Safely check if all 4 required pieces of data have been generated and exist
+    // STRICT CHECK: Ensure arrays actually have items in them
     const isReadyToSave =
-      videoData?.videoScript &&
+      videoData?.videoScript?.length > 0 &&
       videoData?.audioFileUrl &&
-      videoData?.captions &&
-      videoData?.imageList;
+      videoData?.captions?.length > 0 &&
+      videoData?.imageList?.length > 0;
 
     if (isReadyToSave) {
       saveVideoData();
     }
-  }, [videoData])
+  }, [videoData]);
 
-  // Removed the 'videoData' parameter to prevent shadowing the context variable
   const saveVideoData = async () => {
-    setLoading(true)
-
+    setLoading(true);
     try {
-      // 1. Pass the imported SCHEMA TABLE to insert(), not the data object
       const result = await db.insert(VideoTable).values({
         script: videoData?.videoScript,
         audioFileUrl: videoData?.audioFileUrl,
         captions: videoData?.captions,
         imageList: videoData?.imageList,
-        createdBy: user?.primaryEmailAddress?.emailAddress
-      })
-        // 2. Pass the SCHEMA COLUMN to returning(), not the state value
-        .returning({ id: VideoTable.id });
+        createdBy: user?.primaryEmailAddress?.emailAddress,
+        format: formData.aspectRatio || '9:16'
+      }).returning({ id: VideoTable.id });
 
-      await UpdateUsercredits()
-      setVideoId(result[0].id)
-      setPlayVideo(Date.now())
-
-      console.log("Save success:", result)
+      await UpdateUsercredits();
+      setVideoId(result[0].id);
+      setPlayVideo(Date.now());
     } catch (error) {
-      console.error("Failed to save to database:", error)
+      console.error("Failed to save to database:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-
-  //updating users credits after a successful video generation
   const UpdateUsercredits = async () => {
     const currentCredits = userDetail?.credits ?? 0;
     const newCredits = Math.max(0, currentCredits - 100);
-
-    const result = await db
+    await db
       .update(Users)
-      .set({
-        credits: newCredits,
-      })
+      .set({ credits: newCredits })
       .where(eq(Users.email, user?.primaryEmailAddress?.emailAddress));
-
-    console.log(result);
 
     setUserDetail((prev) => ({
       ...prev,
       credits: newCredits,
     }));
-
     setVideoData(null);
   };
 
-
   return (
-    // Added pb-36 (padding-bottom) so the user can scroll past the floating button
-    <div className='max-w-5xl mx-auto pb-36'>
-      {/* <h2 className='font-bold text-4xl text-[#ec0f6b] text-center mt-4'>Create New</h2> */}
+    <div className='max-w-4xl mx-auto pb-48'>
+      {/* Header */}
+      <div className='mb-8'>
+        <h2 className='font-bold text-4xl text-white tracking-tight'>Create New Story</h2>
+        <p className='text-neutral-400 mt-1 text-sm md:text-base'>
+          Configure your prompt, style, format, and let AI bring your narrative to life.
+        </p>
+      </div>
 
-      <div className='mt-8 p-8 md:p-10 bg-[#121212] border border-neutral-900 rounded-2xl'>
-        {/* Select Topic */}
+      {/* Main Form Container */}
+      <div className='p-8 md:p-10 bg-[#121212]/70 backdrop-blur-xl border border-neutral-800/80 rounded-[28px] shadow-[0_0_50px_rgba(0,0,0,0.5)]'>
+        {/* 1. Content / Prompt */}
         <SelectTopic onUserSelect={onHandleInputChange} />
 
-        {/* Select Style */}
+        <div className='w-full h-px bg-neutral-800/60 my-10'></div>
+
+        {/* 2. Visual Style */}
         <SelectStyle onUserSelect={onHandleInputChange} />
 
-        {/* Duration */}
+        <div className='w-full h-px bg-neutral-800/60 my-10'></div>
+
+        {/* 3. Aspect Ratio & Format */}
+        <SelectAspectRatio onUserSelect={onHandleInputChange} />
+
+        <div className='w-full h-px bg-neutral-800/60 my-10'></div>
+
+        {/* 4. Duration */}
         <SelectDuration onUserSelect={onHandleInputChange} />
       </div>
 
-
+      {/* Bottom Docked Floating Action Bar */}
+      {/* <div className='fixed bottom-6 left-0 md:left-64 right-0 flex justify-center z-40 pointer-events-none px-4'>
+        <div className='pointer-events-auto bg-[#121212]/90 backdrop-blur-xl border border-neutral-800/90 rounded-2xl p-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.8)]'>
+          <Button
+            onClick={onClickCreateHandler}
+            disabled={loading}
+            className='flex items-center gap-3 bg-[#ec0f6b] hover:bg-[#d00d5e] text-white py-6 px-10 md:px-14 rounded-xl shadow-[0_0_25px_rgba(236,15,107,0.4)] hover:shadow-[0_0_35px_rgba(236,15,107,0.6)] transition-all cursor-pointer'
+          >
+            <Sparkles size={20} className='animate-pulse' />
+            <div className='text-left'>
+              <div className='font-bold text-base leading-none'>Generate Video</div>
+              <span className='text-[11px] font-normal text-white/80 leading-tight'>100 Credits per generation</span>
+            </div>
+          </Button>
+        </div>
+      </div> */}
 
       {/* Floating Action Button Container */}
       {/* fixed to viewport, centered, pointer-events-none ensures clicks pass through the invisible wrapper */}
       <div className='fixed bottom-10 left-0 md:left-64 right-0 flex justify-center z-50 pointer-events-none'>
-
-        {/* The actual button - re-enabled pointer events, added glow shadow and layout styling */}
         <Button className='pointer-events-auto flex flex-col items-center justify-center gap-1 bg-[#ec0f6b] hover:bg-[#d00d5e] text-white py-8 px-16 md:px-32 rounded-2xl shadow-[0px_10px_40px_rgba(236,15,107,0.9)] hover:shadow-[0_15px_50px_rgba(236,15,107,0.6)] transition-all duration-300 hover:-translate-y-2' onClick={onClickCreateHandler}>
-
           <div className='flex items-center gap-2 text-xl font-bold'>
             <Sparkles size={22} />
             Generate Video
           </div>
-
-          {/* Subtle sub-text to match your reference design */}
           <span className='text-xs font-normal text-white/70'>
             100 Credits to Generate Video
           </span>
-
         </Button>
       </div>
-      <CustomLoading loading={loading} />
 
+      <CustomLoading loading={loading} />
       <PlayerDialog playVideo={playVideo} videoId={videoId} />
     </div>
   )
 }
+
 export default CreateNew

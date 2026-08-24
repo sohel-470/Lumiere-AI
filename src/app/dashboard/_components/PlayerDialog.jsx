@@ -22,6 +22,14 @@ function PlayerDialog({ playVideo, videoId }) {
         }
     }, [playVideo])
 
+
+    const isHorizontal = videoData?.format === '16:9';
+    const compWidth = isHorizontal ? 1920 : 1080;
+    const compHeight = isHorizontal ? 1080 : 1920;
+    const cssAspectRatio = isHorizontal ? '16/9' : '9/16';
+    const maxWidthClass = isHorizontal ? 'max-w-[460px]' : 'max-w-[260px]'; // Make modal wider for horizontal
+
+
     const GetVideoData = async () => {
         const result = await db.select().from(VideoTable).where(eq(VideoTable.id, videoId));
         setVideoData(result[0])
@@ -38,12 +46,12 @@ function PlayerDialog({ playVideo, videoId }) {
                     component: RemotionVideo,
                     durationInFrames: durationInFrame,
                     fps: 30,
-                    width: 1080,
-                    height: 1920,
+                    width: compWidth,   // <-- DYNAMIC
+                    height: compHeight, // <-- DYNAMIC
                 },
                 inputProps: {
                     ...videoData,
-                    setDurationInFrame: () => {} // Dummy function to satisfy prop requirements
+                    setDurationInFrame: () => { } // Dummy function to satisfy prop requirements
                 }
             });
 
@@ -78,17 +86,17 @@ function PlayerDialog({ playVideo, videoId }) {
                         Preview your generated video below.
                     </DialogDescription>
                 </DialogHeader>
-                
+
                 <div className="flex flex-col items-center mt-4">
                     <div className="relative rounded-[16px] overflow-hidden border border-neutral-800 shadow-[0_0_30px_rgba(0,0,0,0.6)] w-full max-w-[260px] bg-black">
                         <Player
                             component={RemotionVideo}
                             durationInFrames={durationInFrame}
-                            compositionWidth={1080}
-                            compositionHeight={1920}
+                            compositionWidth={compWidth}   // <-- DYNAMIC
+                            compositionHeight={compHeight} // <-- DYNAMIC
                             fps={30}
                             controls={true}
-                            style={{ width: '100%', aspectRatio: '9/16', borderRadius: '16px' }}
+                            style={{ width: '100%', aspectRatio: cssAspectRatio, borderRadius: '16px' }}
                             inputProps={{
                                 ...videoData,
                                 setDurationInFrame: setDurationInFrame
@@ -104,7 +112,7 @@ function PlayerDialog({ playVideo, videoId }) {
                         >
                             Cancel
                         </Button>
-                        
+
                         {/* Wire up the onClick and loading state to your existing button styling */}
                         <Button
                             onClick={exportVideo}

@@ -22,10 +22,8 @@ const SelectDuration = ({onUserSelect}) => {
                 <SelectContent>
                     <SelectGroup>
                         <SelectItem value='10 Seconds'>10 Seconds</SelectItem>
+                        <SelectItem value='15 Seconds'>15 Seconds</SelectItem>
                         <SelectItem value='20 Seconds'>20 Seconds</SelectItem>
-                        <SelectItem value='30 Seconds'>30 Seconds</SelectItem>
-                        <SelectItem value='45 Seconds'>45 Seconds</SelectItem>
-                        <SelectItem value='60 Seconds'>60 Seconds</SelectItem>
                     </SelectGroup>
                 </SelectContent>
             </Select>
