@@ -2,19 +2,28 @@ import { storage } from '@/configs/FirebaseConfig';
 import { GoogleGenAI } from '@google/genai';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
+// 1. Recreate the JSON file in Vercel's writable temporary memory
+const keyPath = path.join('/tmp', 'google-credentials.json');
 
-// Parse the JSON string from your Vercel Environment Variable
-const gcpCredentials = process.env.GCP_CREDENTIALS ? JSON.parse(process.env.GCP_CREDENTIALS) : {};
+if (!fs.existsSync(keyPath)) {
+    if (process.env.GCP_CREDENTIALS) {
+        fs.writeFileSync(keyPath, process.env.GCP_CREDENTIALS);
+    } else {
+        console.error("GCP_CREDENTIALS environment variable is missing in Vercel!");
+    }
+}
 
+// 2. Force Google Auth to look at this new temporary file
+process.env.GOOGLE_APPLICATION_CREDENTIALS = keyPath;
+
+// 3. Initialize Gemini normally
 const ai = new GoogleGenAI({
     enterprise: true,
     project: process.env.GOOGLE_CLOUD_PROJECT_ID,
     location: 'global',
-    credentials: {
-        client_email: gcpCredentials.client_email,
-        private_key: gcpCredentials.private_key,
-    }
 });
 
 const model = 'gemini-3.1-flash-image';
