@@ -3,10 +3,18 @@ import { GoogleGenAI } from '@google/genai';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { NextResponse } from 'next/server';
 
+
+// Parse the JSON string from your Vercel Environment Variable
+const gcpCredentials = process.env.GCP_CREDENTIALS ? JSON.parse(process.env.GCP_CREDENTIALS) : {};
+
 const ai = new GoogleGenAI({
     enterprise: true,
     project: process.env.GOOGLE_CLOUD_PROJECT_ID,
     location: 'global',
+    credentials: {
+        client_email: gcpCredentials.client_email,
+        private_key: gcpCredentials.private_key,
+    }
 });
 
 const model = 'gemini-3.1-flash-image';
