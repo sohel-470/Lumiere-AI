@@ -11,7 +11,7 @@ const outfit = Outfit({
 })
 
 export const metadata = {
-  title: "Blur Bird",
+  title: "Lumiere AI",
   description: "An AI video generator",
 };
 
